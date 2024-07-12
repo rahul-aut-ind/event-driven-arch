@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"sort"
@@ -23,7 +24,244 @@ func main() {
 }
 
 func runThis() {
-	module4Assignment()
+	AnimalTypeAssignment()
+}
+
+func AnimalTypeAssignment() {
+	/*******
+	Write a program which allows the user to get information about a predefined set of animals.
+	Three animals are predefined, cow, bird, and snake. Each animal can eat, move, and speak.
+	The user can issue a request to find out one of three things about an animal:
+		1) the food that it eats,
+		2) its method of locomotion, and
+		3) the sound it makes when it speaks.
+	The following table contains the three animals and their associated data which should be hard-coded into your program.
+
+	Your program should present the user with a prompt, “>”, to indicate that the user can type a request.
+	Your program accepts one request at a time from the user, prints out the answer to the request,
+	and prints out a new prompt. Your program should continue in this loop forever.
+	Every request from the user must be a single line containing 2 strings.
+	The first string is the name of an animal, either “cow”, “bird”, or “snake”.
+	The second string is the name of the information requested about the animal,
+		either “eat”, “move”, or “speak”.
+	Your program should process each request by printing out the requested data.
+
+	You will need a data structure to hold the information about each animal.
+	Make a type called Animal which is a struct containing three fields:food,
+	locomotion, and noise, all of which are strings. Make three methods called Eat(),
+	Move(), and Speak(). The receiver type of all of your methods should be your Animal type.
+	The Eat() method should print the animal’s food, the Move() method should print the animal’s
+	locomotion, and the Speak() method should print the animal’s spoken sound.
+	Your program should call the appropriate method when the user makes a request.
+
+	Submit your Go program source code.
+	*******/
+
+	println("Initializing data . . .")
+	cow := Animal{food: "grass", locomotion: "walk", noise: "moo"}
+	bird := Animal{food: "worms", locomotion: "fly", noise: "peep"}
+	snake := Animal{food: "mice", locomotion: "slither", noise: "hsss"}
+
+	println("Please enter your query. example `cow move`")
+
+	// for {
+	var animalType, animalInfo string
+	fmt.Println(">")
+	fmt.Scanln(&animalType, &animalInfo)
+
+	println(animalType, animalInfo)
+
+	switch strings.ToLower(animalType) {
+	case "cow":
+		cow.processInfo(animalInfo)
+	case "bird":
+		bird.processInfo(animalInfo)
+	case "snake":
+		snake.processInfo(animalInfo)
+	default:
+		println("Unknown animal entered. Try again!!")
+
+	}
+	// }
+
+}
+
+func (a *Animal) processInfo(input string) {
+	switch strings.ToLower(input) {
+	case "eat":
+		a.Eat()
+	case "move":
+		a.Move()
+	case "speak":
+		a.Speak()
+	default:
+		println("unknown information requested. Try again!!")
+	}
+}
+
+type Animal struct {
+	food       string
+	locomotion string
+	noise      string
+}
+
+func (a *Animal) Eat() {
+	println(a.food)
+}
+
+func (a *Animal) Move() {
+	println(a.locomotion)
+}
+
+func (a *Animal) Speak() {
+	println(a.noise)
+}
+
+func displacementAssignment() {
+	/*********
+	Let us assume the following formula for
+	displacement s as a function of time t, acceleration a, initial velocity vo,
+	and initial displacement so.
+
+	s = ½ a t2 + vot + so
+
+	Write a program which first prompts the user
+	to enter values for acceleration, initial velocity, and initial displacement.
+	Then the program should prompt the user to enter a value for time and the
+	program should compute the displacement after the entered time.
+
+	You will need to define and use a function
+	called GenDisplaceFn() which takes three float64
+	arguments, acceleration a, initial velocity vo, and initial
+	displacement so. GenDisplaceFn()
+	should return a function which computes displacement as a function of time,
+	assuming the given values acceleration, initial velocity, and initial
+	displacement. The function returned by GenDisplaceFn() should take one float64 argument t, representing time, and return one
+	float64 argument which is the displacement travelled after time t.
+
+	For example, let’s say that I want to assume
+	the following values for acceleration, initial velocity, and initial
+	displacement: a = 10, vo = 2, so = 1. I can use the
+	following statement to call GenDisplaceFn() to
+	generate a function fn which will compute displacement as a function of time.
+
+	fn := GenDisplaceFn(10, 2, 1)
+
+	Then I can use the following statement to
+	print the displacement after 3 seconds.
+
+	fmt.Println(fn(3))
+
+	And I can use the following statement to print
+	the displacement after 5 seconds.
+
+	fmt.Println(fn(5))
+
+	Submit your Go program source code.
+
+	*********/
+
+	var input string
+	fmt.Println("Enter acceleration")
+	fmt.Scan(&input)
+
+	accl, _ := strconv.ParseFloat(input, 64)
+
+	fmt.Println("Enter initial velocity")
+	fmt.Scan(&input)
+
+	inVel, _ := strconv.ParseFloat(input, 64)
+
+	fmt.Println("Enter initial displacement")
+	fmt.Scan(&input)
+
+	inDisp, _ := strconv.ParseFloat(input, 64)
+
+	fn := GenDisplaceFn(accl, inVel, inDisp)
+
+	//println("Displacement after 0 secs is ", fn(0))
+	// println("Displacement after 5 secs is ", fn(5))
+	// println("Displacement after 10 secs is ", fn(10))
+
+	fmt.Println("Enter time (in sec) at which displacement has to be calculated")
+	fmt.Scan(&input)
+
+	time, _ := strconv.ParseFloat(input, 64)
+
+	fmt.Printf("Displacement after %v secs is %v", time, fn(time))
+
+}
+
+func GenDisplaceFn(accl, velo, disp float64) func(float64) float64 {
+	//s = ½ a t2 + vot + so
+
+	return func(time float64) float64 {
+		return 0.5*accl*math.Pow(time, 2) + velo*time + disp
+	}
+
+}
+
+func bubbleSortAssignment() {
+	/****
+	Write a Bubble Sort program in Go. The program
+	should prompt the user to type in a sequence of up to 10 integers. The program
+	should print the integers out on one line, in sorted order, from least to
+	greatest. Use your favorite search tool to find a description of how the bubble
+	sort algorithm works.
+
+	As part of this program, you should write a
+	function called BubbleSort() which
+	takes a slice of integers as an argument and returns nothing. The BubbleSort() function should modify the slice so that the elements are in sorted
+	order.
+
+	A recurring operation in the bubble sort algorithm is
+	the Swap operation which swaps the position of two adjacent elements in the
+	slice. You should write a Swap() function which performs this operation. Your Swap()
+	function should take two arguments, a slice of integers and an index value i which
+	indicates a position in the slice. The Swap() function should return nothing, but it should swap
+	the contents of the slice in position i with the contents in position i+1.
+
+	Submit your Go program source code.
+	*****/
+
+	// 23,67,2,89,324,879,234,65,98,2,6,23,76,-23,67,54,90,-45,-2
+	var input string
+	fmt.Println("Enter Integers to be sorted seperated by a comma ','. Do not put space in between numbers!!")
+	fmt.Scan(&input)
+
+	// 23,67,2,89,324,879,234,65,98,2,6,23,76,-23,67,54,90,-45,-2
+	sArr := strings.Split(input, ",")
+	iArr := make([]int, 0)
+
+	for _, val := range sArr {
+		i, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			fmt.Println("Found an improper Number in the input >> ", val)
+			continue
+		}
+		iArr = append(iArr, int(i))
+	}
+
+	fmt.Println("Input  Integer Array >> ", iArr)
+	BubbleSort(iArr)
+	fmt.Println("Sorted Integer Array >> ", iArr)
+}
+
+func BubbleSort(sl []int) {
+	len := len(sl)
+	for i := 0; i < len; i++ {
+		for j := 0; j < len-1; j++ {
+			if sl[j] > sl[j+1] {
+				Swap(sl, j)
+			}
+		}
+	}
+}
+
+func Swap(s []int, swapIndex int) {
+	temp := s[swapIndex]
+	s[swapIndex] = s[swapIndex+1]
+	s[swapIndex+1] = temp
 }
 
 type (
