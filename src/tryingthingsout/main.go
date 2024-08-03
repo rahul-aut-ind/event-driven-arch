@@ -20,9 +20,9 @@ type (
 )
 
 const (
-	MAX_GUESTS        = 5
-	MAX_TIMES_EAT     = 10
-	MAX_CONCUR_GUESTS = 2
+	MAX_GUESTS        = 10
+	MAX_TIMES_EAT     = 2
+	MAX_CONCUR_GUESTS = 5
 )
 
 var wg sync.WaitGroup
@@ -43,7 +43,7 @@ func (g *Guest) eat(pickupChopSticks chan *Guest) {
 }
 
 func eatingTime() {
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 }
 
 func main() {
@@ -68,7 +68,6 @@ func main() {
 		for i := 0; i < cap(guests); i++ {
 			wg.Add(1)
 			go guests[i].eat(pickUpChopsticksPermission)
-			fmt.Printf("started %d\n", guests[i].ID)
 		}
 
 	}
