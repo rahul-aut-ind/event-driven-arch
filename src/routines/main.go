@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -22,24 +23,30 @@ func idea1() {
 	go func() {
 		fmt.Println(prefix, 1)
 		defer wg.Done()
+		time.Sleep(10 * time.Second)
 		nums <- 1
 		fmt.Println(prefix, "1 done")
 	}()
 	go func() {
 		fmt.Println(prefix, 2)
 		defer wg.Done()
+		time.Sleep(3 * time.Second)
 		nums <- 2
 		fmt.Println(prefix, "2 done")
 	}()
 	go func() {
 		fmt.Println(prefix, 3)
 		defer wg.Done()
+		time.Sleep(1 * time.Second)
 		nums <- 3
 		fmt.Println(prefix, "3 done")
 	}()
 
 	wg.Wait()
 	close(nums)
+	/*
+		This approach blocks the main execution till all go routines are finished and
+	*/
 
 	for i := range nums {
 		fmt.Println(prefix, "received :: ", i)
@@ -58,18 +65,21 @@ func idea2() {
 	go func() {
 		fmt.Println(prefix, 3)
 		defer wg.Done()
+		time.Sleep(1 * time.Second)
 		nums <- 3
 		fmt.Println(prefix, "3 done")
 	}()
 	go func() {
 		fmt.Println(prefix, 2)
 		defer wg.Done()
+		time.Sleep(3 * time.Second)
 		nums <- 2
 		fmt.Println(prefix, "2 done")
 	}()
 	go func() {
 		fmt.Println(prefix, 1)
 		defer wg.Done()
+		time.Sleep(10 * time.Second)
 		nums <- 1
 		fmt.Println(prefix, "1 done")
 	}()
@@ -77,6 +87,13 @@ func idea2() {
 		wg.Wait()
 		close(nums)
 	}()
+	/*
+		If we were to call wg.Wait() directly in the main function before ranging over the channel,
+		the program would get stuck, as follows:
+		- Channel Reads Require a Closed Channel (or Sender Signal): For a range loop to exit,
+		the channel needs to be closed. Without closing it, range would keep waiting indefinitely for
+		new values.
+	*/
 
 	for i := range nums {
 		fmt.Println(prefix, "received :: ", i)
