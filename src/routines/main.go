@@ -7,13 +7,15 @@ import (
 )
 
 func main() {
+	idea3()
+	fmt.Println("- - - - - ")
 	idea1()
 	fmt.Println("- - - - - ")
 	idea2()
 }
 
 func idea1() {
-	prefix := "idea 1> "
+	prefix := "Buffered Channel > "
 	fmt.Println(prefix, "begin")
 	var wg sync.WaitGroup
 	nums := make(chan int, 3)
@@ -23,7 +25,7 @@ func idea1() {
 	go func() {
 		fmt.Println(prefix, 1)
 		defer wg.Done()
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 		nums <- 1
 		fmt.Println(prefix, "1 done")
 	}()
@@ -45,7 +47,7 @@ func idea1() {
 	wg.Wait()
 	close(nums)
 	/*
-		This approach blocks the main execution till all go routines are finished and
+		This approach blocks the main execution till all go routines are finished
 	*/
 
 	for i := range nums {
@@ -55,7 +57,7 @@ func idea1() {
 }
 
 func idea2() {
-	prefix := "idea 2> "
+	prefix := "Unbuffered Channel > "
 	fmt.Println(prefix)
 	var wg sync.WaitGroup
 	nums := make(chan int)
@@ -79,7 +81,7 @@ func idea2() {
 	go func() {
 		fmt.Println(prefix, 1)
 		defer wg.Done()
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 		nums <- 1
 		fmt.Println(prefix, "1 done")
 	}()
@@ -90,6 +92,9 @@ func idea2() {
 	/*
 		If we were to call wg.Wait() directly in the main function before ranging over the channel,
 		the program would get stuck, as follows:
+		- As the channel is unbuffered, unless a value is read, another value to channel cannot be written
+		and this will lead to the first goroutine to not able to exit as it will wait for value to read and
+		in main we are waiting for the go routines to finish. The other go routines cannot write as value is not read.
 		- Channel Reads Require a Closed Channel (or Sender Signal): For a range loop to exit,
 		the channel needs to be closed. Without closing it, range would keep waiting indefinitely for
 		new values.
@@ -102,27 +107,88 @@ func idea2() {
 }
 
 /* output
-idea 1>  begin
-idea 1>  3
-idea 1>  3 done
-idea 1>  1
-idea 1>  1 done
-idea 1>  2
-idea 1>  2 done
-idea 1>  received ::  3
-idea 1>  received ::  1
-idea 1>  received ::  2
-idea 1>  end
+Bufferred Channel >  begin
+Bufferred Channel >  3
+Bufferred Channel >  2
+Bufferred Channel >  1
+Bufferred Channel >  3 done
+Bufferred Channel >  2 done
+Bufferred Channel >  1 done
+Bufferred Channel >  received ::  3
+Bufferred Channel >  received ::  2
+Bufferred Channel >  received ::  1
+Bufferred Channel >  end
 - - - - -
-idea 2>
-idea 2>  3
-idea 2>  3 done
-idea 2>  received ::  3
-idea 2>  1
-idea 2>  1 done
-idea 2>  2
-idea 2>  received ::  1
-idea 2>  received ::  2
-idea 2>  2 done
-idea 2>  end
+Unbufferred Channel >
+Unbufferred Channel >  3
+Unbufferred Channel >  2
+Unbufferred Channel >  1
+Unbufferred Channel >  received ::  3
+Unbufferred Channel >  3 done
+Unbufferred Channel >  received ::  2
+Unbufferred Channel >  2 done
+Unbufferred Channel >  1 done
+Unbufferred Channel >  received ::  1
+Unbufferred Channel >  end
 */
+
+func idea3() {
+	inpCh := make(chan int)
+	outCh := make(chan int)
+
+	var wg sync.WaitGroup
+
+	prefix := "worker"
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		fmt.Println("starting go routines", prefix)
+		go func(i int) {
+			fmt.Println(prefix, i, "started")
+			for n := range inpCh {
+				outCh <- n * 100
+				fmt.Println(prefix, i, "processed %v", n)
+			}
+			wg.Done()
+		}(i)
+	}
+
+	go func() {
+		wg.Wait()
+		fmt.Println(prefix, "finished processing")
+		close(outCh)
+		fmt.Println("closed outCh")
+	}()
+
+	go func() {
+		fmt.Println("processing begin")
+		for i := 10; i < 25; i++ {
+			inpCh <- i
+		}
+		close(inpCh)
+		fmt.Println("closed inCh")
+	}()
+
+	// consume all outputs from go-routines
+	for val := range outCh {
+		fmt.Println("outCh : ", val)
+	}
+
+	fmt.Println("processing end")
+
+}
+
+/***
+expected
+starting worker
+processing begin
+worker 1 started ....
+worker i processed 10...
+outch : i
+worker i processed 10...
+outch : i
+closed inCh
+worker finished processing
+closed outCh
+processing end
+-----------
+***/
