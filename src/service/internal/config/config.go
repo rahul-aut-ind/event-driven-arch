@@ -73,7 +73,7 @@ func NewEnv() *Env {
 	return &Env{
 		Environment:        os.Getenv("ENVIRONMENT"),
 		DefaultAWSRegion:   os.Getenv("AWS_REGION"),
-		TableName:          os.Getenv("DYNAMODB_TABLE_NAME_PROGRESS_PHOTO"),
+		TableName:          os.Getenv("DYNAMODB_TABLE_NAME_SERVICE"),
 		LogLevel:           os.Getenv("LOG_LEVEL"),
 		S3Bucket:           os.Getenv("S3_BUCKET_NAME"),
 		S3Directory:        os.Getenv("S3_DIRECTORY"),

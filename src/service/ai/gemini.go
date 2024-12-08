@@ -19,7 +19,7 @@ const (
 
 type (
 	GeminiHandler interface {
-		GetRecommendationsFromGemini(encodedImage string) (*RecommendationResp, error)
+		GetRecommendationsFromGemini(encodedImage string) (*AnalysisResp, error)
 	}
 
 	GeminiAI struct {
@@ -197,7 +197,7 @@ Additionally, provide a concise, high-value actionable recommendation that summa
 
 }
 
-func (v *GeminiAI) GetRecommendationsFromGemini(encodedImage string) (*RecommendationResp, error) {
+func (v *GeminiAI) GetRecommendationsFromGemini(encodedImage string) (*AnalysisResp, error) {
 	response, err := v.callGeminiAPI(encodedImage)
 	if err != nil {
 		return nil, err
@@ -223,7 +223,7 @@ func (v *GeminiAI) GetRecommendationsFromGemini(encodedImage string) (*Recommend
 		return nil, fmt.Errorf("could not unmarshall the suggestions from response")
 	}
 
-	return &RecommendationResp{
+	return &AnalysisResp{
 		HealthScore:               geminiRec.HealthScore,
 		Title:                     geminiRec.Food,
 		KeyRecommendation:         geminiRec.KeyRecommendation,
