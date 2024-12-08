@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	idea3()
+	fmt.Println("- - - - - ")
 	idea1()
 	fmt.Println("- - - - - ")
 	idea2()
@@ -129,3 +131,64 @@ Unbufferred Channel >  1 done
 Unbufferred Channel >  received ::  1
 Unbufferred Channel >  end
 */
+
+func idea3() {
+	inpCh := make(chan int)
+	outCh := make(chan int)
+
+	var wg sync.WaitGroup
+
+	prefix := "worker"
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		fmt.Println("starting go routines", prefix)
+		go func(i int) {
+			fmt.Println(prefix, i, "started")
+			for n := range inpCh {
+				outCh <- n * 100
+				fmt.Println(prefix, i, "processed %v", n)
+			}
+			wg.Done()
+		}(i)
+	}
+
+	go func() {
+		wg.Wait()
+		fmt.Println(prefix, "finished processing")
+		close(outCh)
+		fmt.Println("closed outCh")
+	}()
+
+	go func() {
+		fmt.Println("processing begin")
+		for i := 10; i < 25; i++ {
+			inpCh <- i
+		}
+		close(inpCh)
+		fmt.Println("closed inCh")
+	}()
+
+	// consume all outputs from go-routines
+	for val := range outCh {
+		fmt.Println("outCh : ", val)
+	}
+
+	fmt.Println("processing end")
+
+}
+
+/***
+expected
+starting worker
+processing begin
+worker 1 started ....
+worker i processed 10...
+outch : i
+worker i processed 10...
+outch : i
+closed inCh
+worker finished processing
+closed outCh
+processing end
+-----------
+***/
