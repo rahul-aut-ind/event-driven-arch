@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"hello-world-lambda/src/ai-try/internal/config"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"hello-world-lambda/src/service/internal/config"
 )
 
 const (
